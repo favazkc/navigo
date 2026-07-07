@@ -1,0 +1,49 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    name: SSH deploy to EC2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/teamsphere
+
+            echo "--- Pulling latest code ---"
+            git pull origin main
+
+            echo "--- Stopping existing container ---"
+            docker stop teamsphere-backend || true
+            docker rm teamsphere-backend || true
+
+            echo "--- Building new image ---"
+            docker build -t teamsphere-backend:latest ./backend
+
+            echo "--- Starting container ---"
+            docker run -d \
+              --name teamsphere-backend \
+              --restart unless-stopped \
+              --env-file ./backend/.env \
+              -p 4000:4000 \
+              teamsphere-backend:latest
+
+            echo "--- Health check ---"
+            sleep 5
+            curl -f http://localhost:4000/health || exit 1
+
+            echo "--- Deploy complete ---"
