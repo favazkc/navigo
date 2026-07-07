@@ -11,7 +11,7 @@ const COLUMN_COLORS = {
   Done: '#22c55e',
 };
 
-export default function KanbanColumn({ status, tasks, onEditTask, onDeleteTask, onCompleteTask, isAdmin }) {
+export default function KanbanColumn({ status, tasks, onViewTask, onDeleteTask, onCompleteTask, isAdmin }) {
   return (
     <Box
       sx={{
@@ -78,7 +78,7 @@ export default function KanbanColumn({ status, tasks, onEditTask, onDeleteTask, 
                 key={task._id}
                 task={task}
                 index={idx}
-                onEdit={onEditTask}
+                onView={onViewTask}
                 onDelete={onDeleteTask}
                 onComplete={onCompleteTask}
                 isAdmin={isAdmin}

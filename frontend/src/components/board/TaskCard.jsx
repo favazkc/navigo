@@ -1,7 +1,6 @@
 import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { Card, CardContent, Typography, Chip, Box, Avatar, IconButton, Tooltip, Button } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -18,7 +17,7 @@ function isOverdue(dueDate, status) {
   return new Date(dueDate) < new Date(new Date().toDateString()); // compare date-only (no time)
 }
 
-export default function TaskCard({ task, index, onEdit, onDelete, onComplete, isAdmin }) {
+export default function TaskCard({ task, index, onView, onDelete, onComplete, isAdmin }) {
   const overdue = isOverdue(task.dueDate, task.status);
 
   return (
@@ -29,12 +28,15 @@ export default function TaskCard({ task, index, onEdit, onDelete, onComplete, is
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           elevation={snapshot.isDragging ? 6 : 1}
+          onClick={() => !snapshot.isDragging && onView(task)}
           sx={{
             mb: 1.5,
             borderRadius: 2,
             opacity: snapshot.isDragging ? 0.95 : 1,
             transition: 'box-shadow 0.2s',
             bgcolor: overdue ? '#fff0f0' : undefined,
+            cursor: 'pointer',
+            '&:hover': { boxShadow: 4 },
           }}
         >
           <CardContent sx={{ pb: '8px !important', pt: 1.5, px: 2 }}>
@@ -43,14 +45,9 @@ export default function TaskCard({ task, index, onEdit, onDelete, onComplete, is
                 {task.title}
               </Typography>
               <Box display="flex">
-                <Tooltip title="Edit">
-                  <IconButton size="small" onClick={() => onEdit(task)}>
-                    <EditIcon fontSize="inherit" />
-                  </IconButton>
-                </Tooltip>
                 {isAdmin && (
                   <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => onDelete(task._id)}>
+                    <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(task._id); }}>
                       <DeleteIcon fontSize="inherit" />
                     </IconButton>
                   </Tooltip>
@@ -80,6 +77,7 @@ export default function TaskCard({ task, index, onEdit, onDelete, onComplete, is
                   startIcon={<CheckCircleOutlineIcon fontSize="inherit" />}
                   onClick={(e) => { e.stopPropagation(); onComplete(task._id); }}
                   sx={{ fontSize: 11, py: 0.25, px: 1, minWidth: 0, lineHeight: 1.5 }}
+                  component="span"
                 >
                   Complete
                 </Button>

@@ -10,6 +10,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import Navbar from '../components/common/Navbar';
 import KanbanColumn from '../components/board/KanbanColumn';
 import TaskDialog from '../components/board/TaskDialog';
+import TaskViewDialog from '../components/board/TaskViewDialog';
 import {
   setTasks, addTask, updateTask, removeTask, reorderTasks,
 } from '../store/slices/tasksSlice';
@@ -37,6 +38,7 @@ export default function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [viewingTask, setViewingTask] = useState(null);
   const [defaultStatus, setDefaultStatus] = useState('Backlog');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
@@ -137,6 +139,10 @@ export default function BoardPage() {
     setEditingTask(null);
     setDefaultStatus('Backlog');
     setDialogOpen(true);
+  };
+
+  const handleViewTask = (task) => {
+    setViewingTask(task);
   };
 
   const handleEditTask = (task) => {
@@ -342,19 +348,37 @@ export default function BoardPage() {
                 .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
               return (
                 <KanbanColumn
-                  key={status}
-                  status={status}
-                  tasks={columnTasks}
-                  onEditTask={handleEditTask}
-                  onDeleteTask={handleDeleteTask}
-                  onCompleteTask={handleCompleteTask}
-                  isAdmin={isAdmin}
-                />
+                    key={status}
+                    status={status}
+                    tasks={columnTasks}
+                    onViewTask={handleViewTask}
+                    onDeleteTask={handleDeleteTask}
+                    onCompleteTask={handleCompleteTask}
+                    isAdmin={isAdmin}
+                  />
               );
             })}
           </Box>
         </DragDropContext>
       </Box>
+
+      {/* Task View Dialog */}
+      <TaskViewDialog
+        open={Boolean(viewingTask)}
+        onClose={() => setViewingTask(null)}
+        task={viewingTask}
+        onEdit={handleEditTask}
+        canEdit={
+          viewingTask
+            ? (isAdmin ||
+               viewingTask.createdBy?._id === user?.id ||
+               viewingTask.createdBy === user?.id ||
+               viewingTask.assignee?._id === user?.id ||
+               viewingTask.assignee === user?.id ||
+               !viewingTask.assignee)
+            : false
+        }
+      />
 
       {/* Task Create/Edit Dialog */}
       <TaskDialog
