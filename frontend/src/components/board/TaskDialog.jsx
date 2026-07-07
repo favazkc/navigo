@@ -21,7 +21,7 @@ function buildForm(data) {
   };
 }
 
-export default function TaskDialog({ open, onClose, onSubmit, initialData, members = [], currentUserId, isAdmin }) {
+export default function TaskDialog({ open, onClose, onSubmit, initialData, members = [], currentUserId, isAdmin, isCreator }) {
   const [form, setForm] = useState(() => buildForm(initialData || {}));
   const [submitting, setSubmitting] = useState(false);
 
@@ -39,6 +39,18 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
   const isEditing = Boolean(initialData?._id);
   const statusOptions = isEditing ? ALL_STATUSES : CREATE_STATUSES;
 
+  // Derive what the current user can do
+  const currentAssigneeId = initialData?.assignee?._id || initialData?.assignee || null;
+  const isAssignedToMe = currentAssigneeId === currentUserId;
+  const isUnassigned = !currentAssigneeId;
+
+  // canEditAll: admin or creator (on create isCreator is always true)
+  const canEditAll = isAdmin || isCreator;
+  // canEditLimited: assignee or unassigned task (status, description, assignee only)
+  const canEditLimited = isAssignedToMe || isUnassigned;
+  // canEditAssignee: can touch the assignee field (but only to self or null)
+  const canEditAssignee = canEditAll || canEditLimited;
+
   const handleSubmit = async () => {
     if (!form.title.trim()) return;
     setSubmitting(true);
@@ -55,13 +67,17 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{initialData?._id ? 'Edit Task' : 'Create Task'}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        {/* Title — editable only for admin or creator */}
         <TextField
           autoFocus
           fullWidth
           label="Title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
+          disabled={isEditing && !canEditAll}
+          InputProps={{ readOnly: isEditing && !canEditAll }}
         />
+        {/* Description — editable for everyone who can edit */}
         <TextField
           fullWidth
           label="Description"
@@ -69,27 +85,33 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           multiline
           rows={3}
+          disabled={isEditing && !canEditAll && !canEditLimited}
         />
+        {/* Status — editable for everyone who can edit */}
         <FormControl fullWidth>
           <InputLabel>Status</InputLabel>
           <Select
             value={form.status}
             label="Status"
             onChange={(e) => setForm({ ...form, status: e.target.value })}
+            disabled={isEditing && !canEditAll && !canEditLimited}
           >
             {statusOptions.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
           </Select>
         </FormControl>
+        {/* Priority — editable only for admin or creator */}
         <FormControl fullWidth>
           <InputLabel>Priority</InputLabel>
           <Select
             value={form.priority}
             label="Priority"
             onChange={(e) => setForm({ ...form, priority: e.target.value })}
+            disabled={isEditing && !canEditAll}
           >
             {PRIORITIES.map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
           </Select>
         </FormControl>
+        {/* Due Date — editable only for admin or creator */}
         <TextField
           fullWidth
           label="Due Date"
@@ -97,6 +119,7 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
           InputLabelProps={{ shrink: true }}
           value={form.dueDate}
           onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+          disabled={isEditing && !canEditAll}
         />
         {/* Created At — read-only, only shown when editing an existing task */}
         {initialData?.createdAt && (
@@ -107,6 +130,7 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
             </Typography>
           </Box>
         )}
+        {/* Assignee — visible to all; editable when canEditAssignee; choices limited to self/null for non-admins */}
         {members.length > 0 && (
           <FormControl fullWidth>
             <InputLabel>Assignee</InputLabel>
@@ -114,11 +138,11 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
               value={form.assignee}
               label="Assignee"
               onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-              disabled={!isAdmin && isEditing && initialData?.assignee?._id !== currentUserId && initialData?.assignee !== currentUserId}
+              disabled={isEditing && !canEditAssignee}
             >
               <MenuItem value="">Unassigned</MenuItem>
               {members
-                .filter((m) => m.user != null && (isAdmin || !isEditing || m.user._id === currentUserId || initialData?.assignee?._id === currentUserId || initialData?.assignee === currentUserId))
+                .filter((m) => m.user != null && (isAdmin || isCreator || (isEditing && !canEditAssignee) || m.user._id === currentUserId))
                 .map((m) => (
                   <MenuItem key={m.user._id} value={m.user._id}>
                     {m.user.name || m.user.email}{m.user._id === currentUserId ? ' (You)' : ''}

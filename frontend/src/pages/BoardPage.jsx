@@ -112,13 +112,14 @@ export default function BoardPage() {
     const updates = tasksInDest.map((t, i) => ({
       id: t._id,
       order: i,
-      status: newStatus,
+      // Only include status on the dragged task — bystanders just need order bumped
+      ...(t._id === draggableId ? { status: newStatus } : {}),
     }));
 
     // Optimistic update
     const updated = tasks.map((t) => {
       const upd = updates.find((u) => u.id === t._id);
-      return upd ? { ...t, order: upd.order, status: upd.status } : t;
+      return upd ? { ...t, order: upd.order, ...(upd.status ? { status: upd.status } : {}) } : t;
     });
     dispatch(reorderTasks(updated));
 
@@ -364,6 +365,7 @@ export default function BoardPage() {
         members={members}
         currentUserId={user?.id}
         isAdmin={isAdmin}
+        isCreator={!editingTask || editingTask.createdBy?._id === user?.id || editingTask.createdBy === user?.id}
       />
     </Box>
   );
