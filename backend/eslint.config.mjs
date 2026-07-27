@@ -17,4 +17,12 @@ export default [
       "no-console": "warn",
     },
   },
+  {
+    files: ["src/__tests__/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
 ];
