@@ -11,11 +11,11 @@ const COLUMN_COLORS = {
   Done: '#22c55e',
 };
 
-export default function KanbanColumn({ status, tasks, onViewTask, onDeleteTask, onCompleteTask, isAdmin }) {
+export default function KanbanColumn({ status, tasks, onViewTask, onDeleteTask, onCompleteTask, isAdmin, mobile }) {
   return (
     <Box
       sx={{
-        width: 270,
+        width: mobile ? '100%' : 270,
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
@@ -55,39 +55,64 @@ export default function KanbanColumn({ status, tasks, onViewTask, onDeleteTask, 
         </Typography>
       </Box>
 
-      {/* Droppable area */}
-      <Droppable droppableId={status}>
-        {(provided, snapshot) => (
-          <Box
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            sx={{
-              p: 1,
-              flexGrow: 1,
-              minHeight: 100,
-              bgcolor: snapshot.isDraggingOver
-                ? 'action.hover'
-                : 'transparent',
-              transition: 'background-color 0.2s',
-              overflowY: 'auto',
-              maxHeight: 'calc(100vh - 280px)',
-            }}
-          >
-            {tasks.map((task, idx) => (
-              <TaskCard
-                key={task._id}
-                task={task}
-                index={idx}
-                onView={onViewTask}
-                onDelete={onDeleteTask}
-                onComplete={onCompleteTask}
-                isAdmin={isAdmin}
-              />
-            ))}
-            {provided.placeholder}
-          </Box>
-        )}
-      </Droppable>
+      {/* Task list area */}
+      {mobile ? (
+        <Box
+          sx={{
+            p: 1,
+            flexGrow: 1,
+            minHeight: 100,
+            overflowY: 'auto',
+            maxHeight: 'calc(100vh - 280px)',
+          }}
+        >
+          {tasks.map((task, idx) => (
+            <TaskCard
+              key={task._id}
+              task={task}
+              index={idx}
+              onView={onViewTask}
+              onDelete={onDeleteTask}
+              onComplete={onCompleteTask}
+              isAdmin={isAdmin}
+              mobile
+            />
+          ))}
+        </Box>
+      ) : (
+        <Droppable droppableId={status}>
+          {(provided, snapshot) => (
+            <Box
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              sx={{
+                p: 1,
+                flexGrow: 1,
+                minHeight: 100,
+                bgcolor: snapshot.isDraggingOver
+                  ? 'action.hover'
+                  : 'transparent',
+                transition: 'background-color 0.2s',
+                overflowY: 'auto',
+                maxHeight: 'calc(100vh - 280px)',
+              }}
+            >
+              {tasks.map((task, idx) => (
+                <TaskCard
+                  key={task._id}
+                  task={task}
+                  index={idx}
+                  onView={onViewTask}
+                  onDelete={onDeleteTask}
+                  onComplete={onCompleteTask}
+                  isAdmin={isAdmin}
+                />
+              ))}
+              {provided.placeholder}
+            </Box>
+          )}
+        </Droppable>
+      )}
 
     </Box>
   );

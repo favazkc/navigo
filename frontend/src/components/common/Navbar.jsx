@@ -17,7 +17,8 @@ export default function Navbar() {
           <Typography
             variant="h6"
             fontWeight={700}
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            noWrap
+            sx={{ flexGrow: 1, minWidth: 0, cursor: 'pointer' }}
             onClick={() => navigate('/dashboard')}
           >
             TeamSphere
@@ -25,7 +26,7 @@ export default function Navbar() {
 
           <Box display="flex" alignItems="center" gap={1}>
             <Tooltip title="Profile">
-              <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
+              <IconButton color="inherit" sx={{ p: 1 }} onClick={() => setDrawerOpen(true)}>
                 <AccountCircleIcon />
               </IconButton>
             </Tooltip>

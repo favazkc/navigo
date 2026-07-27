@@ -39,7 +39,7 @@ export default function TaskViewDialog({ open, onClose, task, onEdit, canEdit })
         </Typography>
       </DialogTitle>
 
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1, maxHeight: '70vh', overflowY: 'auto' }}>
         {/* Status + Priority row */}
         <Box display="flex" gap={1} flexWrap="wrap">
           <Chip

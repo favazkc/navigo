@@ -91,7 +91,7 @@ export default function DashboardPage() {
     <Box minHeight="100vh" bgcolor="background.default">
       <Navbar />
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box display="flex" justifyContent="space-between" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2} mb={3}>
           <Box>
             <Typography variant="h5" fontWeight={700}>
               My Projects
