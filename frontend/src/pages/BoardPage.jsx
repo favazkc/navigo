@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, Typography, CircularProgress, Button, Breadcrumbs, Link, Tooltip, Chip, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Breadcrumbs, Link, Tooltip, Chip, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import AddIcon from '@mui/icons-material/Add';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -35,6 +35,9 @@ export default function BoardPage() {
   const { list: members } = useSelector((s) => s.members);
   const { user } = useSelector((s) => s.auth);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -42,6 +45,7 @@ export default function BoardPage() {
   const [defaultStatus, setDefaultStatus] = useState('Backlog');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
+  const [mobileColumnIndex, setMobileColumnIndex] = useState(0);
 
   const pollRef = useRef(null);
 
@@ -220,7 +224,7 @@ export default function BoardPage() {
             {project?.name}
           </Typography>
         </Breadcrumbs>
-        <Box display="flex" alignItems="flex-start" justifyContent="space-between" mt={1} gap={2}>
+        <Box display="flex" alignItems="flex-start" justifyContent="space-between" flexDirection={{ xs: 'column', sm: 'row' }} mt={1} gap={2}>
           <Box>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Typography variant="h5" fontWeight={700}>
@@ -272,9 +276,9 @@ export default function BoardPage() {
               )}
             </Box>
           </Box>
-          <Box display="flex" gap={1.5} alignItems="center" flexShrink={0}>
+          <Box display="flex" gap={1.5} alignItems="center" flexShrink={0} flexWrap="wrap">
             {/* Filter by Assignee */}
-            <FormControl size="small" sx={{ width: 130, '& .MuiSelect-select': { py: '5px' } }}>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 130 }, '& .MuiSelect-select': { py: '5px' } }}>
               <InputLabel shrink>Assignee</InputLabel>
               <Select
                 value={filterAssignee}
@@ -296,7 +300,7 @@ export default function BoardPage() {
             </FormControl>
 
             {/* Filter by Priority */}
-            <FormControl size="small" sx={{ width: 110, '& .MuiSelect-select': { py: '5px' } }}>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 110 }, '& .MuiSelect-select': { py: '5px' } }}>
               <InputLabel shrink>Priority</InputLabel>
               <Select
                 value={filterPriority}
@@ -317,6 +321,7 @@ export default function BoardPage() {
               size="small"
               startIcon={<AddIcon />}
               onClick={handleAddTask}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
             >
               Create Task
             </Button>
@@ -325,6 +330,7 @@ export default function BoardPage() {
               size="small"
               startIcon={<PeopleIcon />}
               onClick={() => navigate(`/projects/${projectId}/members`)}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
             >
               Members ({project?.members?.length || 0})
             </Button>
@@ -333,34 +339,71 @@ export default function BoardPage() {
       </Box>
 
       {/* Kanban Board */}
-      <Box sx={{ flexGrow: 1, overflowX: 'auto', px: 3, pb: 3 }}>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Box display="flex" gap={2} sx={{ minWidth: 'max-content', pt: 1 }}>
-            {STATUSES.map((status) => {
-              const columnTasks = tasks
-                .filter((t) => t.status === status)
-                .filter((t) => {
-                  if (filterAssignee === '__unassigned__') return !t.assignee;
-                  if (filterAssignee) return t.assignee?._id === filterAssignee;
-                  return true;
-                })
-                .filter((t) => filterPriority ? t.priority === filterPriority : true)
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-              return (
+      {(() => {
+        const tasksByStatus = {};
+        STATUSES.forEach((status) => {
+          tasksByStatus[status] = tasks
+            .filter((t) => t.status === status)
+            .filter((t) => {
+              if (filterAssignee === '__unassigned__') return !t.assignee;
+              if (filterAssignee) return t.assignee?._id === filterAssignee;
+              return true;
+            })
+            .filter((t) => filterPriority ? t.priority === filterPriority : true)
+            .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        });
+
+        return (
+          <>
+            {/* Mobile tab bar */}
+            <Tabs
+              value={mobileColumnIndex}
+              onChange={(_, v) => setMobileColumnIndex(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ display: { xs: 'block', sm: 'none' }, px: 3 }}
+            >
+              {STATUSES.map((status) => (
+                <Tab key={status} label={`${status} (${tasksByStatus[status].length})`} />
+              ))}
+            </Tabs>
+
+            {isMobile ? (
+              /* Mobile: single column, no DragDropContext */
+              <Box sx={{ flexGrow: 1, px: 3, pb: 3, pt: 1 }}>
                 <KanbanColumn
-                    key={status}
-                    status={status}
-                    tasks={columnTasks}
-                    onViewTask={handleViewTask}
-                    onDeleteTask={handleDeleteTask}
-                    onCompleteTask={handleCompleteTask}
-                    isAdmin={isAdmin}
-                  />
-              );
-            })}
-          </Box>
-        </DragDropContext>
-      </Box>
+                  status={STATUSES[mobileColumnIndex]}
+                  tasks={tasksByStatus[STATUSES[mobileColumnIndex]]}
+                  onViewTask={handleViewTask}
+                  onDeleteTask={handleDeleteTask}
+                  onCompleteTask={handleCompleteTask}
+                  isAdmin={isAdmin}
+                  mobile
+                />
+              </Box>
+            ) : (
+              /* Desktop: all columns with drag and drop */
+              <Box sx={{ flexGrow: 1, overflowX: 'auto', px: 3, pb: 3, WebkitOverflowScrolling: 'touch' }}>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Box display="flex" gap={2} sx={{ minWidth: 'max-content', pt: 1 }}>
+                    {STATUSES.map((status) => (
+                      <KanbanColumn
+                        key={status}
+                        status={status}
+                        tasks={tasksByStatus[status]}
+                        onViewTask={handleViewTask}
+                        onDeleteTask={handleDeleteTask}
+                        onCompleteTask={handleCompleteTask}
+                        isAdmin={isAdmin}
+                      />
+                    ))}
+                  </Box>
+                </DragDropContext>
+              </Box>
+            )}
+          </>
+        );
+      })()}
 
       {/* Task View Dialog */}
       <TaskViewDialog

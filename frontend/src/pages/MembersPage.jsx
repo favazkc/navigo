@@ -117,11 +117,12 @@ export default function MembersPage() {
         {loading ? (
           <Box display="flex" justifyContent="center" mt={8}><CircularProgress /></Box>
         ) : (
+          <Box sx={{ overflowX: 'auto' }}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Email</TableCell>
                 <TableCell>Role</TableCell>
                 {isAdmin && <TableCell align="right">Actions</TableCell>}
               </TableRow>
@@ -132,7 +133,7 @@ export default function MembersPage() {
                 return (
                   <TableRow key={m.user?._id}>
                     <TableCell>{m.user?.name || '—'}</TableCell>
-                    <TableCell>{m.user?.email}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{m.user?.email}</TableCell>
                     <TableCell>
                       {isAdmin && !isOwner ? (
                         <Select
@@ -169,6 +170,7 @@ export default function MembersPage() {
               })}
             </TableBody>
           </Table>
+          </Box>
         )}
       </Container>
 

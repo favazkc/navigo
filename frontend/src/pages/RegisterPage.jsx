@@ -58,8 +58,8 @@ export default function RegisterPage() {
       minHeight="100vh"
       bgcolor="background.default"
     >
-      <Container maxWidth="xs">
-        <Paper elevation={3} sx={{ p: 5, borderRadius: 2 }}>
+      <Container maxWidth="xs" sx={{ px: { xs: 1, sm: 3 } }}>
+        <Paper elevation={3} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 2 }}>
           <Typography variant="h4" fontWeight={700} color="primary" gutterBottom textAlign="center">
             TeamSphere
           </Typography>

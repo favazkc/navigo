@@ -66,7 +66,7 @@ export default function TaskDialog({ open, onClose, onSubmit, initialData, membe
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{initialData?._id ? 'Edit Task' : 'Create Task'}</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2, maxHeight: '70vh', overflowY: 'auto' }}>
         {/* Title — editable only for admin or creator */}
         <TextField
           autoFocus

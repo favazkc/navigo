@@ -53,8 +53,8 @@ export default function LoginPage() {
       minHeight="100vh"
       bgcolor="background.default"
     >
-      <Container maxWidth="xs">
-        <Paper elevation={3} sx={{ p: 5, borderRadius: 2 }}>
+      <Container maxWidth="xs" sx={{ px: { xs: 1, sm: 3 } }}>
+        <Paper elevation={3} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 2 }}>
           <Typography variant="h4" fontWeight={700} color="primary" gutterBottom textAlign="center">
             TeamSphere
           </Typography>
@@ -97,7 +97,7 @@ export default function LoginPage() {
           </Box>
 
           <Typography variant="body2" textAlign="center" mt={2}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link component={RouterLink} to="/register">
               Register
             </Link>
