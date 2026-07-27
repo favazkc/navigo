@@ -97,7 +97,7 @@ export default function LoginPage() {
           </Box>
 
           <Typography variant="body2" textAlign="center" mt={2}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link component={RouterLink} to="/register">
               Register
             </Link>
