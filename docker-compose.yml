@@ -1,23 +1,29 @@
 version: '3.9'
 
 services:
+
   backend:
+    image: navigo-backend
     build:
       context: ./backend
-    container_name: teamsphere-backend
+    container_name: navigo-backend
     ports:
       - '4000:4000'
     env_file:
       - ./backend/.env
+    volumes:
+      - ./secrets/jwt_private.pem:/run/secrets/jwt_private.pem:ro
+      - ./secrets/jwt_public.pem:/run/secrets/jwt_public.pem:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 5s
       timeout: 3s
       retries: 10
       start_period: 60s
 
   frontend:
+    image: navigo-frontend
     build:
       context: ./frontend
       args:
@@ -25,7 +31,7 @@ services:
         VITE_APP_URL: ${VITE_APP_URL:-http://localhost:2000}
         VITE_COGNITO_CLIENT_ID: ${VITE_COGNITO_CLIENT_ID}
         VITE_COGNITO_DOMAIN: ${VITE_COGNITO_DOMAIN}
-    container_name: teamsphere-frontend
+    container_name: navigo-frontend
     ports:
       - '2000:80'
     depends_on:

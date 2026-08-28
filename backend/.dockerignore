@@ -1,5 +1,6 @@
-node_modules
-.env
+target/
+*.class
+*.jar
+.mvn/
 *.log
-coverage
-dist
+.env

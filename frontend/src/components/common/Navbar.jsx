@@ -21,7 +21,7 @@ export default function Navbar() {
             sx={{ flexGrow: 1, minWidth: 0, cursor: 'pointer' }}
             onClick={() => navigate('/dashboard')}
           >
-            TeamSphere
+            Navigo
           </Typography>
 
           <Box display="flex" alignItems="center" gap={1}>

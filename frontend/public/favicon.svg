@@ -1,9 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle cx="32" cy="32" r="30" fill="#2563eb"/>
-  <text x="32" y="42"
-        font-family="Arial, sans-serif"
-        font-size="32"
-        font-weight="bold"
-        text-anchor="middle"
-        fill="white">T</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Navigo Logo</title>
+  <desc id="desc">Minimal letter N with a cloud-inspired navigation arc</desc>
+  <defs>
+    <linearGradient id="main" x1="70" y1="430" x2="430" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38BDF8"/>
+      <stop offset="0.5" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="90" y1="250" x2="430" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Cloud / navigation arc -->
+  <path d="M96 285
+           C58 285 38 253 38 218
+           C38 171 76 140 120 140
+           C143 90 190 62 244 62
+           C303 62 353 96 374 143
+           C422 143 458 181 458 226
+           C458 265 432 297 393 305"
+        fill="none"
+        stroke="url(#cloud)"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Minimal N -->
+  <path d="M128 390V190
+           C128 171 143 156 162 156
+           C173 156 183 161 190 170
+           L318 324V190
+           C318 171 333 156 352 156
+           C371 156 386 171 386 190V390
+           C386 409 371 424 352 424
+           C341 424 331 419 324 410
+           L196 256V390
+           C196 409 181 424 162 424
+           C143 424 128 409 128 390Z"
+        fill="url(#main)"/>
 </svg>

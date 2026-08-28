@@ -1,14 +1,18 @@
-FROM node:20-alpine
+# Multi-stage build
 
+# ── Stage 1: Build ─────────────────────────────────────────────────────────────
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-
-# Install dependencies first (layer cache)
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy source
+COPY pom.xml .
+# Download dependencies first (layer cache)
+RUN mvn dependency:go-offline -B
 COPY src ./src
+RUN mvn clean package -DskipTests -B
 
+# ── Stage 2: Runtime ───────────────────────────────────────────────────────────
+FROM eclipse-temurin:21-jre-alpine
+RUN apk add --no-cache curl
+WORKDIR /app
+COPY --from=build /app/target/navigo.jar app.jar
 EXPOSE 4000
-
-CMD ["node", "src/server.js"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
