@@ -43,11 +43,11 @@ jobs:
 
       - name: Sync to S3
         run: |
-          aws s3 sync ./dist s3://navigo-frontend-prod \
+          aws s3 sync ./dist s3://app.zland.in \
             --delete \
             --cache-control "no-store" \
             --exclude "assets/*"
-          aws s3 sync ./dist/assets s3://navigo-frontend-prod/assets \
+          aws s3 sync ./dist/assets s3://app.zland.in/assets \
             --delete \
             --cache-control "public, max-age=31536000, immutable"
 
