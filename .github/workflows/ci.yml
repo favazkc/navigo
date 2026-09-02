@@ -14,25 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
+          java-version: 21
+          distribution: temurin
+          cache: maven
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint --if-present
+      - name: Lint (SpotBugs)
+        run: mvn spotbugs:check -B
 
       - name: Test
-        run: npm test --if-present
-        env:
-          NODE_ENV: test
-          MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
-          JWT_SECRET: ci-test-secret
+        run: mvn test -B
 
   frontend:
     name: Frontend (lint + build)
@@ -46,7 +39,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
