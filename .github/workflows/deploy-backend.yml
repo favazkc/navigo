@@ -46,11 +46,12 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: IMAGE
           script: |
             set -e
 
-            echo "--- Pulling image ---"
-            docker pull ${{ needs.build.outputs.image }}
+            echo "--- Pulling image: $IMAGE ---"
+            docker pull "$IMAGE"
 
             echo "--- Stopping existing container ---"
             docker stop navigo-backend || true
@@ -64,10 +65,12 @@ jobs:
               -v ~/jwt_private.pem:/run/secrets/jwt_private.pem:ro \
               -v ~/jwt_public.pem:/run/secrets/jwt_public.pem:ro \
               -p 4000:4000 \
-              ${{ needs.build.outputs.image }}
+              "$IMAGE"
 
             echo "--- Health check ---"
             sleep 5
             curl -f http://localhost:4000/health || exit 1
 
             echo "--- Deploy complete ---"
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
