@@ -4,8 +4,8 @@ secrets/*.p12
 secrets/*.jks
 
 # Backend build artifacts
-backend/node_modules/
 backend/.env
+backend/navigo-backend.env
 
 # Spring Boot build artifacts
 backend/target/
