@@ -62,7 +62,7 @@ jobs:
               "$IMAGE"
 
             echo "--- Health check ---"
-            sleep 5
+            sleep 15
             curl -f http://localhost:4000/health || exit 1
 
             echo "--- Deploy complete ---"
