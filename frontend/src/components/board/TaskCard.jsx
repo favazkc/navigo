@@ -27,7 +27,7 @@ function CardBody({ task, overdue, isDragging, dragProps, onView, onDelete, onCo
         borderRadius: 2,
         opacity: isDragging ? 0.95 : 1,
         transition: 'box-shadow 0.2s',
-        bgcolor: overdue ? '#fff0f0' : undefined,
+        border: overdue ? '2px solid #ef4444' : '2px solid transparent',
         cursor: 'pointer',
         '&:hover': { boxShadow: 4 },
       }}

@@ -139,7 +139,7 @@ export default function DashboardPage() {
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      bgcolor: overdue ? '#fff0f0' : undefined,
+                      border: overdue ? '2px solid #ef4444' : '2px solid transparent',
                     }}
                     onClick={() => navigate(`/projects/${project._id}`)}
                   >
