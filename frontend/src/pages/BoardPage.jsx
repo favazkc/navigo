@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, Typography, CircularProgress, Button, Breadcrumbs, Link, Tooltip, Chip, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Breadcrumbs, Link, Tooltip, Chip, Select, MenuItem, FormControl, InputLabel, useMediaQuery, useTheme } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import AddIcon from '@mui/icons-material/Add';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -45,7 +45,7 @@ export default function BoardPage() {
   const [defaultStatus, setDefaultStatus] = useState('Backlog');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
-  const [mobileColumnIndex, setMobileColumnIndex] = useState(0);
+  const [filterStatus, setFilterStatus] = useState(STATUSES[0]);
 
   const pollRef = useRef(null);
 
@@ -207,6 +207,19 @@ export default function BoardPage() {
     );
   }
 
+  const tasksByStatus = {};
+  STATUSES.forEach((status) => {
+    tasksByStatus[status] = tasks
+      .filter((t) => t.status === status)
+      .filter((t) => {
+        if (filterAssignee === '__unassigned__') return !t.assignee;
+        if (filterAssignee) return t.assignee?._id === filterAssignee;
+        return true;
+      })
+      .filter((t) => filterPriority ? t.priority === filterPriority : true)
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  });
+
   return (
     <Box minHeight="100vh" bgcolor="background.default" display="flex" flexDirection="column">
       <Navbar />
@@ -277,6 +290,42 @@ export default function BoardPage() {
             </Box>
           </Box>
           <Box display="flex" gap={1.5} alignItems="center" flexShrink={0} flexWrap="wrap">
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={handleAddTask}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
+            >
+              Create Task
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PeopleIcon />}
+              onClick={() => navigate(`/projects/${projectId}/members`)}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
+            >
+              Members ({project?.members?.length || 0})
+            </Button>
+
+            {/* Filter by Status — mobile only */}
+            <FormControl size="small" sx={{ display: { xs: 'flex', sm: 'none' }, width: '100%', '& .MuiSelect-select': { py: '5px' } }}>
+              <InputLabel shrink>Status</InputLabel>
+              <Select
+                value={filterStatus}
+                label="Status"
+                notched
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                {STATUSES.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status} ({tasksByStatus[status].length})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             {/* Filter by Assignee */}
             <FormControl size="small" sx={{ width: { xs: '100%', sm: 130 }, '& .MuiSelect-select': { py: '5px' } }}>
               <InputLabel shrink>Assignee</InputLabel>
@@ -315,59 +364,16 @@ export default function BoardPage() {
                 <MenuItem value="Low">Low</MenuItem>
               </Select>
             </FormControl>
-
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={handleAddTask}
-              sx={{ width: { xs: '100%', sm: 'auto' } }}
-            >
-              Create Task
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<PeopleIcon />}
-              onClick={() => navigate(`/projects/${projectId}/members`)}
-              sx={{ width: { xs: '100%', sm: 'auto' } }}
-            >
-              Members ({project?.members?.length || 0})
-            </Button>
           </Box>
         </Box>
       </Box>
 
       {/* Kanban Board */}
       {(() => {
-        const tasksByStatus = {};
-        STATUSES.forEach((status) => {
-          tasksByStatus[status] = tasks
-            .filter((t) => t.status === status)
-            .filter((t) => {
-              if (filterAssignee === '__unassigned__') return !t.assignee;
-              if (filterAssignee) return t.assignee?._id === filterAssignee;
-              return true;
-            })
-            .filter((t) => filterPriority ? t.priority === filterPriority : true)
-            .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        });
+        const mobileColumnIndex = STATUSES.indexOf(filterStatus);
 
         return (
           <>
-            {/* Mobile tab bar */}
-            <Tabs
-              value={mobileColumnIndex}
-              onChange={(_, v) => setMobileColumnIndex(v)}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{ display: { xs: 'block', sm: 'none' }, px: 3 }}
-            >
-              {STATUSES.map((status) => (
-                <Tab key={status} label={`${status} (${tasksByStatus[status].length})`} />
-              ))}
-            </Tabs>
-
             {isMobile ? (
               /* Mobile: single column, no DragDropContext */
               <Box sx={{ flexGrow: 1, px: 3, pb: 3, pt: 1 }}>
