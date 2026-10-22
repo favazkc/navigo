@@ -1,6 +1,6 @@
 # Navigo
 
-Navigo is an enterprise-grade, collaborative project and task management application (Kanban board) built with a secure, highly scalable, and decoupled full-stack architecture.
+Navigo is an enterprise-grade, collaborative project and task management application (Kanban board) built with a secure, highly scalable, and decoupled full-stack architecture available at https://app.zland.in.
 
 ---
 
@@ -141,11 +141,3 @@ docker-compose up --build
    ```bash
    npm run dev
    ```
-
----
-
-## 🚢 Deployment
-
-Detailed deployment procedures are fully documented in the [`docs/`](docs/) directory:
-- **Backend Setup & Deployment (EC2 + Nginx + Docker):** Refer to [`docs/deploy-backend.md`](docs/deploy-backend.md)
-- **Frontend Setup & Deployment (S3 + CloudFront):** Refer to [`docs/deploy-frontend.md`](docs/deploy-frontend.md)
